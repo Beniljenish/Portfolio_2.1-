@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 export function Contact() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
 
   useEffect(() => {
@@ -16,10 +18,25 @@ export function Contact() {
     return () => obs.disconnect();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 3500);
+    setSending(true);
+    setError('');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error();
+      setSent(true);
+      setForm({ name: '', email: '', subject: '', message: '' });
+      setTimeout(() => setSent(false), 4000);
+    } catch {
+      setError('Failed to send. Please email me directly at beniljenish@gmail.com');
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -103,10 +120,12 @@ export function Contact() {
             <button
               type="submit"
               className="pf-btn pf-btn-chrome"
+              disabled={sending || sent}
               style={sent ? { backgroundImage: 'linear-gradient(135deg,#888,#ccc,#888)' } : {}}
             >
-              {sent ? 'Message Sent ✓' : 'Send Message ↗'}
+              {sent ? 'Message Sent ✓' : sending ? 'Sending…' : 'Send Message ↗'}
             </button>
+            {error && <p style={{ color: '#ff6b6b', marginTop: '0.75rem', fontSize: '0.85rem' }}>{error}</p>}
           </div>
         </form>
       </div>
