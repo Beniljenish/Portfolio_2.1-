@@ -20,20 +20,23 @@ export function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSending(true);
     setError('');
+    setSending(true);
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error((data as { error?: string }).error || 'Failed to send. Please try again.');
+      }
       setSent(true);
       setForm({ name: '', email: '', subject: '', message: '' });
-      setTimeout(() => setSent(false), 4000);
-    } catch {
-      setError('Failed to send. Please email me directly at beniljenish@gmail.com');
+      setTimeout(() => setSent(false), 5000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong.');
     } finally {
       setSending(false);
     }
@@ -116,6 +119,9 @@ export function Contact() {
               onChange={handleChange}
             />
           </div>
+          {error && (
+            <p style={{ color: '#e53e3e', fontSize: '13px', marginBottom: '8px' }}>{error}</p>
+          )}
           <div className="pf-form-btn">
             <button
               type="submit"
@@ -123,9 +129,8 @@ export function Contact() {
               disabled={sending || sent}
               style={sent ? { backgroundImage: 'linear-gradient(135deg,#888,#ccc,#888)' } : {}}
             >
-              {sent ? 'Message Sent ✓' : sending ? 'Sending…' : 'Send Message ↗'}
+              {sending ? 'Sending…' : sent ? 'Message Sent ✓' : 'Send Message ↗'}
             </button>
-            {error && <p style={{ color: '#ff6b6b', marginTop: '0.75rem', fontSize: '0.85rem' }}>{error}</p>}
           </div>
         </form>
       </div>
