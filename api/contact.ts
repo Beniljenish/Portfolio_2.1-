@@ -330,7 +330,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await Promise.all([
       // Notification email → you
       resend.emails.send({
-        from: 'Portfolio Contact <hello@beniljenish.dev>',
+        from: 'Portfolio Contact <onboarding@resend.dev>',
         to: 'beniljenish@gmail.com',
         replyTo: email,
         subject: `New message from ${name}${subject ? ` — ${subject}` : ''}`,
@@ -338,7 +338,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }),
       // Auto-reply → sender
       resend.emails.send({
-        from: 'Benil Jenish <hello@beniljenish.dev>',
+        from: 'Benil Jenish <onboarding@resend.dev>',
         to: email,
         subject: `Thanks for reaching out, ${name}`,
         html: fill(autoreplyTemplate, vars),
@@ -347,7 +347,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({ success: true });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Failed to send email' });
+    console.error('Resend error:', JSON.stringify(err));
+    return res.status(500).json({ error: 'Failed to send email', detail: String(err) });
   }
 }
