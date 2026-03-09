@@ -1,0 +1,9 @@
+# Allow all search engines to crawl
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://yourwebsite.com/sitemap.xml
+
+# Crawl-delay (optional, to be nice to the server)
+Crawl-delay: 1
